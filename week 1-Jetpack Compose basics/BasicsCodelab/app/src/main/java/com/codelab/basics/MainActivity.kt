@@ -22,21 +22,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -60,6 +51,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             BasicsCodelabTheme {
                 MyApp()
+
+                Surface(color = MaterialTheme.colors.background) {
+                    Greeting2("Hello")
+                }
             }
         }
     }
@@ -180,5 +175,125 @@ fun DefaultPreview() {
 fun OnboardingPreview() {
     BasicsCodelabTheme {
         OnboardingScreen(onContinueClicked = {})
+    }
+}
+
+@Composable
+private fun Greeting2(name: String) {
+    Surface(color = MaterialTheme.colors.primary) {
+        Column {
+            Text(text = "Greeting2, $name", modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp))
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 320, heightDp = 320)
+@Composable
+fun TestPreview() {
+    BasicsCodelabTheme {
+        ListTest()
+    }
+}
+
+@Composable
+fun ListTest(list: List<String> = listOf("First", "Second")) {
+    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+        list.forEach { str ->
+            Greeting3(str)
+        }
+    }
+}
+
+@Composable
+fun Greeting3(name: String) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+
+    val extraPadding by animateDpAsState( if (expanded) 148.dp else 0.dp ,
+    animationSpec = spring(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessLow
+    ))
+
+    Surface(color = MaterialTheme.colors.primary, modifier = Modifier.padding(vertical = 6.dp, horizontal = 6.dp)) {
+        Row(modifier = Modifier.padding(24.dp)) {
+            Column(modifier = Modifier
+                .weight(1f)
+                .padding(bottom = extraPadding.coerceAtLeast(0.dp))) {
+                Text("Hello,")
+                Text(name, style = MaterialTheme.typography.h4.copy(
+                    fontWeight = FontWeight.ExtraBold
+                ))
+
+                if (expanded) {
+                    Text("AAAAAAAAAAAAAAAAAAAAAAAAA\n" +
+                            "AAAAAAAAAAAAAAAAAAAAAAAAA\n" +
+                            "AAAAAAAAAAAAAAAAAAAAAAAAA\n")
+                }
+            }
+
+            IconButton(onClick = { expanded = !expanded }) {
+                Icon(
+                    imageVector = if (expanded) Filled.ExpandLess else Filled.ExpandMore,
+                    contentDescription = if (expanded) {
+                        stringResource(R.string.show_less)
+                    } else {
+                        stringResource(R.string.show_more)
+                    }
+
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun OnBoardingScreen2(onContinueClicked: () -> Unit) {
+
+    Surface {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("Welcome to the basic codelab!")
+            Button(
+                modifier = Modifier.padding(vertical = 24.dp),
+                onClick = onContinueClicked
+            ) {
+                Text("Continue")
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 320, heightDp = 320)
+@Composable
+fun OnBoarding2Preview() {
+    BasicsCodelabTheme {
+        MyApp2()
+    }
+}
+
+@Composable
+fun MyApp2() {
+    var shouldShowOnBoarding by rememberSaveable { mutableStateOf(true) }
+
+    if (shouldShowOnBoarding) {
+        OnBoardingScreen2 {
+            shouldShowOnBoarding = false
+        }
+    } else {
+        Greetings2()
+    }
+}
+
+@Composable
+fun Greetings2(names: List<String> = List(1000) { "$it"}) {
+    LazyColumn(modifier = Modifier.padding(vertical = 4.dp)) {
+        items(items = names) { name ->
+            Greeting3(name = name)
+        }
     }
 }
